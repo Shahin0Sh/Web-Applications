@@ -3,10 +3,12 @@ from bs4 import BeautifulSoup as bs
 import os
 import pandas as pd
 
-url = 'https://dev.bg/company/jobs/junior-intern/?_seniority=intern'
+# https://dev.bg/company/jobs/junior-intern
+url = input()
 
 page = r.get(url)
 soup = bs(page.text, 'html.parser')
+
 results = soup.find(id="jobs")
 alljobs_elements = results.find_all('div', class_='job-list-item')
 
@@ -34,3 +36,5 @@ if data:
         df.loc[lenght] = val
         df.to_csv(cwd, index=False, sep=';', encoding='utf-8-sig')
         print(f'{val} added to csv')
+else:
+    print('No data')
