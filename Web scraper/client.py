@@ -4,6 +4,7 @@ import os
 import pandas as pd
 
 # https://dev.bg/company/jobs/junior-intern
+# https://dev.bg/company/jobs/junior-intern/?_paged=4
 url = input()
 
 page = r.get(url)
