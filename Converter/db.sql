@@ -23,8 +23,8 @@ USE `ko_converter_db` ;
 CREATE TABLE IF NOT EXISTS `ko_converter_db`.`kc` (
   `kc_id` INT(11) NOT NULL AUTO_INCREMENT,
   `amount` INT(11) NOT NULL,
-  `price` FLOAT NOT NULL,
-  `currency` VARCHAR(3) NOT NULL,
+  `price_tr` FLOAT NOT NULL,
+  `price_bgn` FLOAT NOT NULL,
   PRIMARY KEY (`kc_id`),
   UNIQUE INDEX `kc_id_UNIQUE` (`kc_id` ASC) VISIBLE,
   UNIQUE INDEX `amount_UNIQUE` (`amount` ASC) VISIBLE)
@@ -33,36 +33,20 @@ DEFAULT CHARACTER SET = latin1;
 
 
 -- -----------------------------------------------------
--- Table `ko_converter_db`.`end_table`
+-- Table `ko_converter_db`.`kc_ingame_price`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `ko_converter_db`.`end_table` (
+CREATE TABLE IF NOT EXISTS `ko_converter_db`.`kc_ingame_price` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `kc_id` INT(11) NOT NULL,
-  `currency` VARCHAR(3) NOT NULL,
-  `price` FLOAT NOT NULL,
-  `game_cash` FLOAT NOT NULL,
+  `ingame_price` FLOAT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
-  INDEX `fk_end_table_kc_idx` (`kc_id` ASC) VISIBLE,
-  CONSTRAINT `fk_end_table_kc`
+  INDEX `fk_kc_ingame_price_kc1_idx` (`kc_id` ASC) VISIBLE,
+  CONSTRAINT `fk_kc_ingame_price_kc1`
     FOREIGN KEY (`kc_id`)
     REFERENCES `ko_converter_db`.`kc` (`kc_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = latin1;
-
-
--- -----------------------------------------------------
--- Table `ko_converter_db`.`rates`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `ko_converter_db`.`rates` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `base` TINYTEXT NOT NULL,
-  `currency` VARCHAR(3) NOT NULL,
-  `price` FLOAT NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = latin1;
 
