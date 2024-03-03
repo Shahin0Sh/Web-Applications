@@ -2,6 +2,7 @@ import requests as r
 from bs4 import BeautifulSoup as bs
 from data.database import insert_query, update_query, read_query
 from data.models import ResponseKCmod
+from fastapi import HTTPException
 
 def get_rates() -> dict:
     
@@ -50,12 +51,12 @@ def convert_bgn_to_try(bgn: float) -> float:
     return round(bgn * float(try_curr), 3)
 
 def update_db(amount: int, price_try: float, 
-              price_bgn: float, ingame_cash: float) -> None | ValueError:
+              price_bgn: float, ingame_cash: float) -> None:
     
-    ans = update_query('''UPDATE kc SET amount_kc = ?, price_tr = ?, price_bgn = ?, ingame_cash_gb = ?''',
-                       (amount, price_try, price_bgn, ingame_cash))
-    if not ans:
-        raise ValueError('Could not update the database.')
+    update_query('''UPDATE kc SET price_tr = ?, price_bgn = ?, ingame_cash_gb = ?
+                       WHERE amount_kc = ?''',
+                       (price_try, price_bgn, ingame_cash, amount))
+
 
 def insert_db(amount: int, price_try: float, 
               price_bgn: float, ingame_cash: float) -> None | ValueError:
@@ -66,7 +67,7 @@ def insert_db(amount: int, price_try: float,
     if not ans:
         raise ValueError('Could not insert into the database.')
 
-def ingame_cash_libr(amount) -> float:
+def ingame_cash_libr(amount) -> int | float:
     if amount == 100:
         return 0.45
     elif amount == 500:
@@ -80,9 +81,12 @@ def ingame_cash_libr(amount) -> float:
     else:
         return 0
 
-def upd_kc_prices():
+def upd_kc_prices() -> None | HTTPException: # updated db
 
     kc_prices = get_kc_prices()
+
+    if not kc_prices:
+        raise HTTPException(status_code=404, detail='Rates not found.')
 
     for key, value in kc_prices.items():
         amount = int(key[:-3])
@@ -91,9 +95,12 @@ def upd_kc_prices():
         ingame_cash = ingame_cash_libr(amount)
         update_db(amount, price_try, price_bgn, ingame_cash)
 
-def insert_kc_prices():
+def insert_kc_prices() -> None | HTTPException: # this func inserts data in the db when starting the app for the first time
 
     kc_prices = get_kc_prices()
+
+    if not kc_prices:
+        raise HTTPException(status_code=404, detail='Rates not found.')
 
     for key, value in kc_prices.items():
         amount = int(key[:-3])
@@ -102,7 +109,18 @@ def insert_kc_prices():
         ingame_cash = ingame_cash_libr(amount)
         insert_db(amount, price_try, price_bgn, ingame_cash)
 
-def get_data():
+def get_data() -> list[ResponseKCmod]:
 
     data = read_query('''SELECT amount_kc, price_tr, price_bgn, ingame_cash_gb FROM kc''')
     return [ResponseKCmod.from_query_result(*row) for row in data]
+
+def get_amount_kc(amount: int) -> ResponseKCmod | None:
+
+    data = read_query('''SELECT amount_kc, price_tr, price_bgn, ingame_cash_gb FROM kc
+                      WHERE amount_kc = ?''', (amount,))
+    
+    return next((ResponseKCmod.from_query_result(*row) for row in data), None)
+
+def check_data_exists() -> bool:
+
+   return True if (read_query('''SELECT 1 FROM kc''')) else False
