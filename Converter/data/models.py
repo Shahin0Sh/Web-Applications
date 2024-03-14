@@ -14,3 +14,10 @@ class ResponseKCmod(BaseModel):
                 try_price=f'{try_price} TRY',
                    bgn_price=f'{bgn_price} BGN',
                    ingame_cash=f'{ingame_cash} GB')
+
+class InGameCash(BaseModel):
+    kc_100: float
+    kc_500: float
+    kc_1000: float
+    kc_3100: float
+    kc_5500: float
