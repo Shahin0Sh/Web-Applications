@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup as bs
 from data.database import insert_query, update_query, read_query
 from data.models import ResponseKCmod
 from fastapi import HTTPException
+from common.validators import KC_INGAME_CASH
 
 def get_rates() -> dict:
     
@@ -68,18 +69,17 @@ def insert_db(amount: int, price_try: float,
         raise ValueError('Could not insert into the database.')
 
 def ingame_cash_libr(amount) -> int | float:
-    if amount == 100:
-        return 0.45
-    elif amount == 500:
-        return 4.50
-    elif amount == 1000:
-        return 9.00
-    elif amount == 3100:
-        return 27.45
-    elif amount == 5500:
-        return 49.5
-    else:
+    try:
+        return KC_INGAME_CASH[amount]
+    except:
         return 0
+
+def update_ingame_cash_libr(data: dict) -> None:
+    
+    for key, value in data:
+        key = key[3:]
+        update_query('''UPDATE kc SET ingame_cash_gb = ?
+                     WHERE amount_kc = ?''',(value, key))
 
 def upd_kc_prices() -> None | HTTPException: # updated db
 
